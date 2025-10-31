@@ -1,0 +1,63 @@
+package gui;
+
+import db.DBConnection;
+
+import javax.swing.*;
+import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+public class RegisterFrame extends JFrame {
+    public RegisterFrame() {
+        setTitle("📝 Signup - Urban Rides");
+        setSize(400, 280);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new GridLayout(5, 2, 10, 10));
+
+        JLabel title = new JLabel("Create New Account", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JTextField nameField = new JTextField();
+        JTextField emailField = new JTextField();
+        JPasswordField passField = new JPasswordField();
+        JButton registerBtn = new JButton("Register");
+        JButton backBtn = new JButton("⬅ Back");
+
+        nameField.setFont(new Font("Arial", Font.PLAIN, 16));
+        emailField.setFont(new Font("Arial", Font.PLAIN, 16));
+        passField.setFont(new Font("Arial", Font.PLAIN, 16));
+        registerBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        backBtn.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        add(new JLabel("Name:", SwingConstants.RIGHT)); add(nameField);
+        add(new JLabel("Email:", SwingConstants.RIGHT)); add(emailField);
+        add(new JLabel("Password:", SwingConstants.RIGHT)); add(passField);
+        add(registerBtn); add(backBtn);
+
+        registerBtn.addActionListener(e -> {
+            try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement ps = conn.prepareStatement(
+                        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
+                );
+                ps.setString(1, nameField.getText());
+                ps.setString(2, emailField.getText());
+                ps.setString(3, new String(passField.getPassword()));
+                ps.executeUpdate();
+                JOptionPane.showMessageDialog(this, "✅ Registration Successful! Now login.");
+                dispose();
+                new LoginFrame();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "❌ Email already exists or error.");
+            }
+        });
+
+        backBtn.addActionListener(e -> {
+            dispose();
+            new MainFrame();
+        });
+
+        setVisible(true);
+    }
+}
