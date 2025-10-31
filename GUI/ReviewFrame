@@ -1,0 +1,99 @@
+package gui;
+
+import db.DBConnection;
+import models.Car;
+import models.User;
+
+import javax.swing.*;
+import java.awt.*;
+import java.sql.*;
+
+public class ReviewFrame extends JFrame {
+    public ReviewFrame(User user) {
+        setTitle("⭐ Rating & Review");
+        setSize(600, 450);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JButton writeBtn = new JButton("🖊️ Write Review");
+        JButton viewBtn  = new JButton("📖 View Reviews");
+        JTextArea area   = new JTextArea();
+        area.setEditable(false);
+        area.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // View Reviews
+        viewBtn.addActionListener(e -> {
+            area.setText("");
+            try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement ps = conn.prepareStatement(
+                        "SELECT c.model, c.category, r.rating, r.comment FROM reviews r JOIN cars c ON r.car_id = c.id"
+                );
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    area.append("🚘 " + rs.getString("model") + " (" + rs.getString("category") + ")\n");
+                    area.append("⭐ Rating: " + rs.getInt("rating") + "/5\n");
+                    area.append("💬 " + rs.getString("comment") + "\n\n");
+                }
+            } catch (Exception ex) {
+                area.setText("❌ Failed to load reviews.");
+            }
+        });
+
+        // Write Review
+        writeBtn.addActionListener(e -> {
+            JComboBox<Car> carBox = new JComboBox<>();
+            try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement ps = conn.prepareStatement(
+                        "SELECT DISTINCT c.id, c.model, c.category, c.price_per_day FROM bookings b JOIN cars c ON b.car_id = c.id WHERE b.user_email=?"
+                );
+                ps.setString(1, user.getEmail());
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    carBox.addItem(new Car(
+                            rs.getInt("id"),
+                            rs.getString("model"),
+                            rs.getString("category"),
+                            rs.getDouble("price_per_day"),
+                            true
+                    ));
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            JTextField ratingField = new JTextField();
+            JTextArea commentArea = new JTextArea(3, 20);
+            JPanel p = new JPanel(new GridLayout(3, 2));
+            p.add(new JLabel("Select Car:")); p.add(carBox);
+            p.add(new JLabel("Rating (1-5):")); p.add(ratingField);
+            p.add(new JLabel("Comment:")); p.add(new JScrollPane(commentArea));
+
+            int result = JOptionPane.showConfirmDialog(this, p, "Write Review", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                try (Connection conn = DBConnection.getConnection()) {
+                    PreparedStatement ps = conn.prepareStatement(
+                            "INSERT INTO reviews (user_email, car_id, rating, comment) VALUES (?, ?, ?, ?)"
+                    );
+                    Car selected = (Car) carBox.getSelectedItem();
+                    ps.setString(1, user.getEmail());
+                    ps.setInt(2, selected.getId());
+                    ps.setInt(3, Integer.parseInt(ratingField.getText()));
+                    ps.setString(4, commentArea.getText());
+                    ps.executeUpdate();
+                    JOptionPane.showMessageDialog(this, "✅ Review submitted!");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "❌ Failed to submit review.");
+                }
+            }
+        });
+
+        JPanel top = new JPanel(new FlowLayout());
+        top.add(writeBtn); top.add(viewBtn);
+
+        add(top, BorderLayout.NORTH);
+        add(new JScrollPane(area), BorderLayout.CENTER);
+        setVisible(true);
+    }
+}
