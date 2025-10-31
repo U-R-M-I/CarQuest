@@ -1,0 +1,50 @@
+package gui;
+
+import db.DBConnection;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.*;
+
+public class AdminBookingViewFrame extends JFrame {
+    public AdminBookingViewFrame() {
+        setTitle("📑 All Bookings");
+        setSize(800, 450);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        String[] columns = {"User", "Car", "Category", "Price", "Booking Time", "Returned", "Rating", "Review"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
+        JTable table = new JTable(model);
+
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT u.name, c.model, c.category, c.price_per_day, b.booking_time, b.is_returned, r.rating, r.comment " +
+                            "FROM bookings b " +
+                            "JOIN users u ON b.user_email = u.email " +
+                            "JOIN cars c ON b.car_id = c.id " +
+                            "LEFT JOIN reviews r ON b.car_id = r.car_id AND b.user_email = r.user_email"
+            );
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                        rs.getString("name"),
+                        rs.getString("model"),
+                        rs.getString("category"),
+                        rs.getDouble("price_per_day"),
+                        rs.getTimestamp("booking_time"),
+                        rs.getBoolean("is_returned") ? "Yes" : "No",
+                        rs.getInt("rating") == 0 ? "-" : rs.getInt("rating"),
+                        rs.getString("comment") == null ? "" : rs.getString("comment")
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        add(new JScrollPane(table), BorderLayout.CENTER);
+        setVisible(true);
+    }
+}
