@@ -1,0 +1,62 @@
+package gui;
+
+import db.DBConnection;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.*;
+
+public class ManageUsersFrame extends JFrame {
+    public ManageUsersFrame() {
+        setTitle("👤 Manage Users");
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JLabel header = new JLabel("Registered Users", SwingConstants.CENTER);
+        header.setFont(new Font("Arial", Font.BOLD, 18));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"ID", "Name", "Email"}, 0);
+        JTable table = new JTable(model);
+        JScrollPane scroll = new JScrollPane(table);
+
+        JButton deleteBtn = new JButton("❌ Delete Selected User");
+
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT id, name, email FROM users");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email")
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        deleteBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row == -1) return;
+            int id = (int) model.getValueAt(row, 0);
+            try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement ps = conn.prepareStatement("DELETE FROM users WHERE id=?");
+                ps.setInt(1, id);
+                ps.executeUpdate();
+                model.removeRow(row);
+                JOptionPane.showMessageDialog(this, "✅ User deleted.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        add(header, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
+        add(deleteBtn, BorderLayout.SOUTH);
+        setVisible(true);
+    }
+}
