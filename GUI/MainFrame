@@ -1,0 +1,50 @@
+package gui;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class MainFrame extends JFrame {
+    public MainFrame() {
+        setTitle("🚗 Urban Rides - Welcome");
+        setSize(500, 350);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        // Title
+        JLabel title = new JLabel("Welcome to Urban Rides", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+
+        // Buttons
+        JButton loginBtn = new JButton("🔐 Login");
+        JButton signupBtn = new JButton("📝 Signup");
+
+        loginBtn.setFont(new Font("Arial", Font.PLAIN, 18));
+        signupBtn.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        loginBtn.setPreferredSize(new Dimension(200, 50));
+        signupBtn.setPreferredSize(new Dimension(200, 50));
+
+        JPanel btnPanel = new JPanel();
+        btnPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        btnPanel.add(loginBtn);
+        btnPanel.add(signupBtn);
+
+        // Add
+        add(title, BorderLayout.NORTH);
+        add(btnPanel, BorderLayout.CENTER);
+
+        // Action
+        loginBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame();
+        });
+        signupBtn.addActionListener(e -> {
+            dispose();
+            new RegisterFrame();
+        });
+
+        setVisible(true);
+    }
+}
