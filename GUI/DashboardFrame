@@ -10,13 +10,13 @@ public class DashboardFrame extends JFrame {
 
     public DashboardFrame(User user) {
         this.user = user;
-        setTitle("🏠 Dashboard - Urban Rides");
+        setTitle("🏠 Dashboard - CarQuest");
         setSize(500, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JLabel title = new JLabel("Hello, " + user.getName() + "! Welcome to Urban Rides", SwingConstants.CENTER);
+        JLabel title = new JLabel("Hello, " + user.getName() + "! Welcome to CarQuest", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 18));
         title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
