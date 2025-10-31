@@ -1,0 +1,51 @@
+package gui;
+
+import models.User;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class AdminDashboardFrame extends JFrame {
+    public AdminDashboardFrame(User user) {
+        setTitle("🛠️ Admin Dashboard");
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JLabel header = new JLabel("Welcome Admin: " + user.getName(), SwingConstants.CENTER);
+        header.setFont(new Font("Arial", Font.BOLD, 20));
+        header.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 20, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+
+        JButton manageUsersBtn    = new JButton("👤 Manage Users");
+        JButton manageCarsBtn     = new JButton("🚘 Manage Vehicles");
+        JButton viewBookingsBtn   = new JButton("📑 View All Bookings");
+        JButton logoutBtn         = new JButton("🚪 Logout");
+
+        manageUsersBtn.setFont(new Font("Arial", Font.PLAIN, 16));
+        manageCarsBtn.setFont(new Font("Arial", Font.PLAIN, 16));
+        viewBookingsBtn.setFont(new Font("Arial", Font.PLAIN, 16));
+        logoutBtn.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        manageUsersBtn.addActionListener(e -> new ManageUsersFrame());
+        manageCarsBtn.addActionListener(e -> new ManageVehiclesFrame());
+        viewBookingsBtn.addActionListener(e -> new AdminBookingViewFrame());
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new MainFrame();
+        });
+
+        panel.add(manageUsersBtn);
+        panel.add(manageCarsBtn);
+        panel.add(viewBookingsBtn);
+        panel.add(logoutBtn);
+
+        add(header, BorderLayout.NORTH);
+        add(panel, BorderLayout.CENTER);
+
+        setVisible(true);
+    }
+}
