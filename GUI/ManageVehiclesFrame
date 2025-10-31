@@ -1,0 +1,118 @@
+package gui;
+
+import db.DBConnection;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.*;
+
+public class ManageVehiclesFrame extends JFrame {
+    public ManageVehiclesFrame() {
+        setTitle("🚘 Manage Vehicles");
+        setSize(700, 450);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"ID", "Model", "Category", "Price", "Available"}, 0);
+        JTable table = new JTable(model);
+
+        JButton addBtn = new JButton("➕ Add New Car");
+        JButton delBtn = new JButton("❌ Delete");
+        JButton updateBtn = new JButton("✏️ Update Price");
+
+        JPanel btnPanel = new JPanel(new FlowLayout());
+        btnPanel.add(addBtn);
+        btnPanel.add(delBtn);
+        btnPanel.add(updateBtn);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        // Load cars
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM cars");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getString("model"),
+                        rs.getString("category"),
+                        rs.getDouble("price_per_day"),
+                        rs.getBoolean("is_available") ? "Yes" : "No"
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Add car
+        addBtn.addActionListener(e -> {
+            JTextField modelField = new JTextField();
+            JTextField catField = new JTextField();
+            JTextField priceField = new JTextField();
+
+            JPanel panel = new JPanel(new GridLayout(3, 2));
+            panel.add(new JLabel("Model:")); panel.add(modelField);
+            panel.add(new JLabel("Category:")); panel.add(catField);
+            panel.add(new JLabel("Price:")); panel.add(priceField);
+
+            int res = JOptionPane.showConfirmDialog(this, panel, "Add Car", JOptionPane.OK_CANCEL_OPTION);
+            if (res == JOptionPane.OK_OPTION) {
+                try (Connection conn = DBConnection.getConnection()) {
+                    PreparedStatement ps = conn.prepareStatement(
+                            "INSERT INTO cars (model, category, price_per_day) VALUES (?, ?, ?)"
+                    );
+                    ps.setString(1, modelField.getText());
+                    ps.setString(2, catField.getText());
+                    ps.setDouble(3, Double.parseDouble(priceField.getText()));
+                    ps.executeUpdate();
+                    JOptionPane.showMessageDialog(this, "✅ Car Added.");
+                    dispose();
+                    new ManageVehiclesFrame(); // reload
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        // Delete car
+        delBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row == -1) return;
+            int id = (int) model.getValueAt(row, 0);
+            try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement ps = conn.prepareStatement("DELETE FROM cars WHERE id=?");
+                ps.setInt(1, id);
+                ps.executeUpdate();
+                model.removeRow(row);
+                JOptionPane.showMessageDialog(this, "❌ Car deleted.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        // Update price
+        updateBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row == -1) return;
+            int id = (int) model.getValueAt(row, 0);
+            String newPrice = JOptionPane.showInputDialog("Enter New Price:");
+            try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement ps = conn.prepareStatement("UPDATE cars SET price_per_day=? WHERE id=?");
+                ps.setDouble(1, Double.parseDouble(newPrice));
+                ps.setInt(2, id);
+                ps.executeUpdate();
+                JOptionPane.showMessageDialog(this, "✅ Price updated.");
+                dispose();
+                new ManageVehiclesFrame();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(btnPanel, BorderLayout.SOUTH);
+        setVisible(true);
+    }
+}
