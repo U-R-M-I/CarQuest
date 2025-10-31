@@ -19,9 +19,9 @@ public class ContactUsFrame extends JFrame {
         info.setEditable(false);
         info.setFont(new Font("Arial", Font.PLAIN, 16));
         info.setText(
-                "📍 Address: 123 Urban Street, Dhaka, Bangladesh\n" +
+                "📍 Address: 123 CarQuest Street, Dhaka, Bangladesh\n" +
                         "📞 Phone: +880-1234-567890\n" +
-                        "📧 Email: support@urbanrides.com\n\n" +
+                        "📧 Email: support@CarQuest.com\n\n" +
                         "Thank you for choosing CarQuest!"
         );
 
