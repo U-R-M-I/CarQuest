@@ -1,0 +1,32 @@
+package gui;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class ContactUsFrame extends JFrame {
+    public ContactUsFrame() {
+        setTitle("Contact Us");
+        setSize(400, 300);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JLabel title = new JLabel("Contact Information", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
+
+        JTextArea info = new JTextArea();
+        info.setEditable(false);
+        info.setFont(new Font("Arial", Font.PLAIN, 16));
+        info.setText(
+                "📍 Address: 123 Urban Street, Dhaka, Bangladesh\n" +
+                        "📞 Phone: +880-1234-567890\n" +
+                        "📧 Email: support@urbanrides.com\n\n" +
+                        "Thank you for choosing CarQuest!"
+        );
+
+        add(title, BorderLayout.NORTH);
+        add(new JScrollPane(info), BorderLayout.CENTER);
+        setVisible(true);
+    }
+}
