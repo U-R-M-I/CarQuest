@@ -1,0 +1,56 @@
+package gui;
+
+import models.User;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class DashboardFrame extends JFrame {
+    private final User user;
+
+    public DashboardFrame(User user) {
+        this.user = user;
+        setTitle("🏠 Dashboard - Urban Rides");
+        setSize(500, 500);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        JLabel title = new JLabel("Hello, " + user.getName() + "! Welcome to Urban Rides", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+
+        JPanel panel = new JPanel(new GridLayout(5, 1, 15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
+
+        JButton bookBtn     = new JButton("🚗 Book Rides");
+        JButton historyBtn  = new JButton("📋 View Booking History");
+        JButton returnBtn   = new JButton("🔁 Return Vehicle");
+        JButton reviewBtn   = new JButton("⭐ Rating & Review");
+        JButton contactBtn  = new JButton("📧 Contact Us");
+
+        bookBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        historyBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        returnBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        reviewBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        contactBtn.setFont(new Font("Arial", Font.BOLD, 16));
+
+        panel.add(bookBtn);
+        panel.add(historyBtn);
+        panel.add(returnBtn);
+        panel.add(reviewBtn);
+        panel.add(contactBtn);
+
+        // Button actions
+        bookBtn.addActionListener(e -> new BookRideFrame(user));
+        historyBtn.addActionListener(e -> new BookingHistoryFrame(user));
+        returnBtn.addActionListener(e -> new ReturnVehicleFrame(user));
+        reviewBtn.addActionListener(e -> new ReviewFrame(user));
+        contactBtn.addActionListener(e -> new ContactUsFrame());
+
+        add(title, BorderLayout.NORTH);
+        add(panel, BorderLayout.CENTER);
+
+        setVisible(true);
+    }
+}
